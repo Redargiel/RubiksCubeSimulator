@@ -1,0 +1,230 @@
+﻿<Window x:Class="RubikovaKostka.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Rubikova Kostka Simulátor"
+        Height="1000" Width="1300"
+        WindowStartupLocation="CenterScreen"
+        KeyDown="Window_KeyDown"
+        Focusable="True"
+        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <!-- 1) Horní část s 2D kostkou -->
+            <RowDefinition Height="*"/>
+            <!-- 2) Prostřední část s tlačítky šipek -->
+            <RowDefinition Height="Auto"/>
+            <!-- 3) Spodní část (Reset, Undo, Scramble, Moves) -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 2D Rozvinutá kostka -->
+        <Grid x:Name="CubeGrid"
+              Grid.Row="0"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 
+               Layout: 
+                   (row=0,col=1) = YELLOW (Top)
+               (row=1,col=0) = GREEN (Left), (row=1,col=1)=ORANGE(Front), 
+                                (row=1,col=2)=BLUE(Right), (row=1,col=3)=RED(Back)
+               (row=2,col=1) = WHITE (Bottom)
+            -->
+
+            <!-- TOP (YELLOW) -->
+            <Border x:Name="TopBorder"
+                    Grid.Row="0" Grid.Column="1"
+                    BorderThickness="1"
+                    BorderBrush="Transparent"
+                    Margin="5">
+                <Grid x:Name="TopSide" 
+                      Width="210" Height="210">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+
+            <!-- LEFT (GREEN) -->
+            <Border x:Name="LeftBorder"
+                    Grid.Row="1" Grid.Column="0"
+                    BorderThickness="1"
+                    BorderBrush="Transparent"
+                    Margin="5">
+                <Grid x:Name="LeftSide"
+                      Width="210" Height="210">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+
+            <!-- FRONT (ORANGE) -->
+            <Border x:Name="FrontBorder"
+                    Grid.Row="1" Grid.Column="1"
+                    BorderThickness="1"
+                    BorderBrush="Transparent"
+                    Margin="5">
+                <Grid x:Name="FrontSide"
+                      Width="210" Height="210">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+
+            <!-- RIGHT (BLUE) -->
+            <Border x:Name="RightBorder"
+                    Grid.Row="1" Grid.Column="2"
+                    BorderThickness="1"
+                    BorderBrush="Transparent"
+                    Margin="5">
+                <Grid x:Name="RightSide"
+                      Width="210" Height="210">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+
+            <!-- BACK (RED) -->
+            <Border x:Name="BackBorder"
+                    Grid.Row="1" Grid.Column="3"
+                    BorderThickness="1"
+                    BorderBrush="Transparent"
+                    Margin="5">
+                <Grid x:Name="BackSide"
+                      Width="210" Height="210">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+
+            <!-- BOTTOM (WHITE) -->
+            <Border x:Name="BottomBorder"
+                    Grid.Row="2" Grid.Column="1"
+                    BorderThickness="1"
+                    BorderBrush="Transparent"
+                    Margin="5">
+                <Grid x:Name="BottomSide"
+                      Width="210" Height="210">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="70"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- TLAČÍTKA šipek (up/down/left/right) -->
+        <StackPanel Orientation="Vertical"
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="↑"
+                        Width="50" Height="50"
+                        Margin="5"
+                        Click="RotateUp_Click"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="←"
+                        Width="50" Height="50"
+                        Margin="5"
+                        Click="RotateLeft_Click"/>
+                <Button Content="→"
+                        Width="50" Height="50"
+                        Margin="5"
+                        Click="RotateRight_Click"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="↓"
+                        Width="50" Height="50"
+                        Margin="5"
+                        Click="RotateDown_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Spodní panel (Reset, Undo, Scramble, Moves) -->
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="10">
+            <Button Content="Reset"
+                    Width="80" Height="40"
+                    Margin="10"
+                    Click="ResetCube_Click"/>
+            <Button Content="Undo"
+                    Width="80" Height="40"
+                    Margin="10"
+                    Click="UndoMove_Click"/>
+            <Button Content="Scramble"
+                    Width="80" Height="40"
+                    Margin="10"
+                    Click="ScrambleCube_Click"/>
+
+            <TextBlock x:Name="MovesTextBlock"
+                       Text="Moves: 0"
+                       FontSize="18"
+                       VerticalAlignment="Center"
+                       Margin="20,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
