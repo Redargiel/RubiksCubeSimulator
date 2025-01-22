@@ -38,17 +38,14 @@
 
             <!-- 
                Layout: 
-                   (row=0,col=1) = YELLOW (Top)
-               (row=1,col=0) = GREEN (Left), (row=1,col=1)=ORANGE(Front), 
-                                (row=1,col=2)=BLUE(Right), (row=1,col=3)=RED(Back)
-               (row=2,col=1) = WHITE (Bottom)
+                     (row=0,col=1) = Top (YELLOW)
+               (row=1,col=0) = Left (GREEN), (row=1,col=1)=Front (ORANGE),
+                                (row=1,col=2)=Right (BLUE),  (row=1,col=3)=Back (RED)
+                     (row=2,col=1) = Bottom (WHITE)
             -->
 
             <!-- TOP (YELLOW) -->
-            <Border x:Name="TopBorder"
-                    Grid.Row="0" Grid.Column="1"
-                    BorderThickness="1"
-                    BorderBrush="Transparent"
+            <Border Grid.Row="0" Grid.Column="1"
                     Margin="5">
                 <Grid x:Name="TopSide" 
                       Width="210" Height="210">
@@ -66,10 +63,7 @@
             </Border>
 
             <!-- LEFT (GREEN) -->
-            <Border x:Name="LeftBorder"
-                    Grid.Row="1" Grid.Column="0"
-                    BorderThickness="1"
-                    BorderBrush="Transparent"
+            <Border Grid.Row="1" Grid.Column="0"
                     Margin="5">
                 <Grid x:Name="LeftSide"
                       Width="210" Height="210">
@@ -87,10 +81,7 @@
             </Border>
 
             <!-- FRONT (ORANGE) -->
-            <Border x:Name="FrontBorder"
-                    Grid.Row="1" Grid.Column="1"
-                    BorderThickness="1"
-                    BorderBrush="Transparent"
+            <Border Grid.Row="1" Grid.Column="1"
                     Margin="5">
                 <Grid x:Name="FrontSide"
                       Width="210" Height="210">
@@ -108,10 +99,7 @@
             </Border>
 
             <!-- RIGHT (BLUE) -->
-            <Border x:Name="RightBorder"
-                    Grid.Row="1" Grid.Column="2"
-                    BorderThickness="1"
-                    BorderBrush="Transparent"
+            <Border Grid.Row="1" Grid.Column="2"
                     Margin="5">
                 <Grid x:Name="RightSide"
                       Width="210" Height="210">
@@ -129,10 +117,7 @@
             </Border>
 
             <!-- BACK (RED) -->
-            <Border x:Name="BackBorder"
-                    Grid.Row="1" Grid.Column="3"
-                    BorderThickness="1"
-                    BorderBrush="Transparent"
+            <Border Grid.Row="1" Grid.Column="3"
                     Margin="5">
                 <Grid x:Name="BackSide"
                       Width="210" Height="210">
@@ -150,10 +135,7 @@
             </Border>
 
             <!-- BOTTOM (WHITE) -->
-            <Border x:Name="BottomBorder"
-                    Grid.Row="2" Grid.Column="1"
-                    BorderThickness="1"
-                    BorderBrush="Transparent"
+            <Border Grid.Row="2" Grid.Column="1"
                     Margin="5">
                 <Grid x:Name="BottomSide"
                       Width="210" Height="210">
@@ -171,7 +153,7 @@
             </Border>
         </Grid>
 
-        <!-- TLAČÍTKA šipek (up/down/left/right) -->
+        <!-- TLAČÍTKA šipek (nahoru/dolu/doleva/doprava) -->
         <StackPanel Orientation="Vertical"
                     Grid.Row="1"
                     HorizontalAlignment="Center"
