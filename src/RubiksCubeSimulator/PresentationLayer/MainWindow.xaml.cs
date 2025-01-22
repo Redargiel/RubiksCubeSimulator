@@ -35,8 +35,7 @@ namespace RubikovaKostka
                 {"Bottom",BottomSide}
             };
 
-            // Základní barvy: Top=žlutá, Left=zelená, Front=oranžová,
-            //                Right=modrá, Back=červená, Bottom=bílá
+            // Výchozí barvy 6 stěn
             colors = new Dictionary<string, List<Color>>
             {
                 {"Top",    CreateColorList(Colors.Yellow)},
@@ -56,7 +55,7 @@ namespace RubikovaKostka
             return Enumerable.Repeat(c, 9).ToList();
         }
 
-        // Vykreslí 9 obdélníků pro každou stěnu
+        // Vykreslení 3x3 obdélníků na všech 6 stěn
         private void InitializeCube()
         {
             foreach (var kvp in sides)
@@ -108,6 +107,7 @@ namespace RubikovaKostka
             }
         }
 
+        // Umožní ovládání šipkami z klávesnice
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (selectedSide == null || !selectedBlock.HasValue) return;
@@ -120,7 +120,7 @@ namespace RubikovaKostka
             }
         }
 
-        // ---- Ovládací tlačítka:
+        // --- Tlačítka pro rotace (nahoru/dolů/doleva/doprava):
 
         private void RotateUp_Click(object sender, RoutedEventArgs e)
         {
@@ -130,6 +130,7 @@ namespace RubikovaKostka
             // "Nahoru" => otáčí se vybraný sloupec
             DecideAndRotateVertical(selectedSide, selectedBlock.Value.row, selectedBlock.Value.col, moveUp: true);
 
+            // Zvýšíme count a překreslíme
             moveCount++;
             InitializeCube();
         }
@@ -150,7 +151,6 @@ namespace RubikovaKostka
             if (selectedSide == null || !selectedBlock.HasValue) return;
             SaveStateForUndo();
 
-            // "Doleva" => řádek = proti směru hodin
             DecideAndRotateHorizontal(selectedSide, selectedBlock.Value.row, selectedBlock.Value.col, moveLeft: true);
 
             moveCount++;
@@ -162,15 +162,17 @@ namespace RubikovaKostka
             if (selectedSide == null || !selectedBlock.HasValue) return;
             SaveStateForUndo();
 
-            // "Doprava" => řádek = po směru hodin
             DecideAndRotateHorizontal(selectedSide, selectedBlock.Value.row, selectedBlock.Value.col, moveLeft: false);
 
             moveCount++;
             InitializeCube();
         }
 
+        // --- Reset, Undo, Scramble:
+
         private void ResetCube_Click(object sender, RoutedEventArgs e)
         {
+            // Nastavit všechny stěny na původní barvy
             colors["Top"] = CreateColorList(Colors.Yellow);
             colors["Left"] = CreateColorList(Colors.Green);
             colors["Front"] = CreateColorList(Colors.Orange);
@@ -193,23 +195,38 @@ namespace RubikovaKostka
             {
                 var action = undoStack.Pop();
                 action.Invoke();
+
+                // Snížíme moveCount o 1 a hlídáme záporné hodnoty
+                moveCount--;
+                if (moveCount < 0) moveCount = 0;
+
                 InitializeCube();
             }
         }
 
         private void ScrambleCube_Click(object sender, RoutedEventArgs e)
         {
+            // Provedeme např. 20 náhodných legit tahů, 
+            // ALE moveCount nebudeme zvyšovat (aby po scramble byl 0).
+            // Avšak pro Undo si ukládáme stavy do undoStack (každý tah).
+            // Tím lze teoreticky "Undo" vracet i scramble pohyby.
+
             var sidesAll = new[] { "Top", "Left", "Front", "Right", "Back", "Bottom" };
             var rnd = new Random();
-            int moves = 20;
-            for (int i = 0; i < moves; i++)
+
+            int movesToDo = 20; // kolik náhodných tahů
+            for (int i = 0; i < movesToDo; i++)
             {
+                // Uložíme stav do undoStack
                 SaveStateForUndo();
+
+                // Náhodně zvolíme stěnu i polohu
                 string s = sidesAll[rnd.Next(sidesAll.Length)];
                 int row = rnd.Next(3);
                 int col = rnd.Next(3);
                 int dir = rnd.Next(4); // 0=Up,1=Down,2=Left,3=Right
 
+                // Provedeme pohyb, ale moveCount NEzvyšujeme
                 switch (dir)
                 {
                     case 0: DecideAndRotateVertical(s, row, col, moveUp: true); break;
@@ -217,24 +234,28 @@ namespace RubikovaKostka
                     case 2: DecideAndRotateHorizontal(s, row, col, moveLeft: true); break;
                     case 3: DecideAndRotateHorizontal(s, row, col, moveLeft: false); break;
                 }
-                moveCount++;
             }
+
+            // Po skončení scramble vynulujeme moveCount 
+            moveCount = 0;
             InitializeCube();
         }
 
+        // Ukládá kopii stavu (pro Undo)
         private void SaveStateForUndo()
         {
             var snap = new Dictionary<string, List<Color>>();
             foreach (var kvp in colors)
                 snap[kvp.Key] = new List<Color>(kvp.Value);
 
-            undoStack.Push(() => {
+            undoStack.Push(() =>
+            {
                 foreach (var k in snap.Keys)
                     colors[k] = new List<Color>(snap[k]);
             });
         }
 
-        // ---- Pomocné funkce (čtení/zápis řádku/sloupce):
+        // --- Pomocné funkce (GetRow,SetRow,GetColumn,SetColumn)...
 
         private List<Color> GetRow(string side, int row)
         {
@@ -270,7 +291,7 @@ namespace RubikovaKostka
             colors[side][2 * 3 + col] = colColors[2];
         }
 
-        // ---- Otočení celé stěny (face):
+        // Otočení celé jedné stěny (face):
         private void RotateSideClockwise(string side)
         {
             var old = colors[side].ToArray();
@@ -278,7 +299,7 @@ namespace RubikovaKostka
             colors[side][1] = old[3];
             colors[side][2] = old[0];
             colors[side][3] = old[7];
-            // [4] střed se nemění
+            // střed [4] se nemění
             colors[side][5] = old[1];
             colors[side][6] = old[8];
             colors[side][7] = old[5];
@@ -291,20 +312,13 @@ namespace RubikovaKostka
                 RotateSideClockwise(side);
         }
 
-        // ======================================================
-        //   1) "Vertikální" tah (Up/Down) => sloupec
-        // ======================================================
+        // ===============================================
+        //   VERTIKÁLNÍ (Up/Down) => sloupec
+        // ===============================================
+
         private void DecideAndRotateVertical(string side, int row, int col, bool moveUp)
         {
-            // Front: col=0 => L, col=1 => M, col=2 => R  (OK)
-            // Left:  col=0 => B, col=1 => M, col=2 => F
-            // Top:   col=0 => L, col=1 => M, col=2 => R
-            // Right: col=0 => F, col=1 => M, col=2 => B
-            // Back:  col=0 => R, col=1 => M, col=2 => L  (symetrie s frontem)
-            // Bottom: col=0 => L' (nebo L?), col=1 => M', col=2 => R'? 
-            //   Tady se můžeme rozhodnout, jestli "Up" = L nebo L' – 
-            //   Dá se to odladit podle preferencí.
-
+            // Např. "Front", col=0 => L/L' atd. 
             if (side == "Front")
             {
                 if (col == 0) { if (moveUp) RotateL(); else RotateLprime(); }
@@ -325,40 +339,32 @@ namespace RubikovaKostka
             }
             else if (side == "Right")
             {
-                // col=0 => F, col=1 => M, col=2 => B
                 if (col == 0) { if (moveUp) RotateF(); else RotateFprime(); }
                 else if (col == 1) { if (moveUp) RotateM(); else RotateMprime(); }
                 else if (col == 2) { if (moveUp) RotateB(); else RotateBprime(); }
             }
             else if (side == "Back")
             {
-                // col=0 => R, col=1 => M, col=2 => L (zhruba zrcadlo frontu)
                 if (col == 0) { if (moveUp) RotateR(); else RotateRprime(); }
                 else if (col == 1) { if (moveUp) RotateM(); else RotateMprime(); }
                 else if (col == 2) { if (moveUp) RotateL(); else RotateLprime(); }
             }
             else if (side == "Bottom")
             {
-                // Podobně – col=0 => L'?, col=1 => M'?, col=2 => R'? 
-                // Zde to nastavím, aby "moveUp" volalo prime (může to být obráceně, je to jen konvence).
+                // col=0 => L' / L, col=1 => M'/M, col=2 => R'/R
                 if (col == 0) { if (moveUp) RotateLprime(); else RotateL(); }
                 else if (col == 1) { if (moveUp) RotateMprime(); else RotateM(); }
                 else if (col == 2) { if (moveUp) RotateRprime(); else RotateR(); }
             }
         }
 
-        // ======================================================
-        //   2) "Horizontální" tah (Left/Right) => řádek
-        // ======================================================
+        // ===============================================
+        //   HORIZONTÁLNÍ (Left/Right) => řádek
+        // ===============================================
+
         private void DecideAndRotateHorizontal(string side, int row, int col, bool moveLeft)
         {
-            // Front:  row=0 => U, row=1 => E, row=2 => D
-            // Left:   row=0 => U, row=1 => E, row=2 => D
-            // Right:  row=0 => U, row=1 => E, row=2 => D
-            // Back:   row=0 => U' (nebo U?), row=1 => E', row=2 => D'? (dle konvencí)
-            // Top:    row=0 => B, row=1 => S, row=2 => F  (popř. prime varianty)
-            // Bottom: row=0 => F', row=1 => S', row=2 => B' ?
-
+            // Front: row=0 => U/U', row=1 => E/E', row=2 => D/D'
             if (side == "Front")
             {
                 if (row == 0) { if (moveLeft) RotateUprime(); else RotateU(); }
@@ -367,51 +373,44 @@ namespace RubikovaKostka
             }
             else if (side == "Left")
             {
-                // stejná logika
                 if (row == 0) { if (moveLeft) RotateUprime(); else RotateU(); }
                 else if (row == 1) { if (moveLeft) RotateEprime(); else RotateE(); }
-                else if (row == 2) { if (moveLeft) RotateDprime(); else RotateD(); }
+                else { if (moveLeft) RotateDprime(); else RotateD(); }
             }
             else if (side == "Right")
             {
-                // taky U / D / E
                 if (row == 0) { if (moveLeft) RotateUprime(); else RotateU(); }
                 else if (row == 1) { if (moveLeft) RotateEprime(); else RotateE(); }
-                else if (row == 2) { if (moveLeft) RotateDprime(); else RotateD(); }
+                else { if (moveLeft) RotateDprime(); else RotateD(); }
             }
             else if (side == "Back")
             {
-                // "Back" z pohledu horizontálního je často obrácené => 
-                //   row=0 => U / U'? Ale zrcadlově, 
-                //   pro ukázku dám: row=0 => (moveLeft)? RotateU() : RotateUprime()
-                //   klidně upravte, pokud se vám směr nezdá.
+                // "Back" mívá opačnou interpretaci, 
+                //   např. row=0 => (moveLeft)? U : U'
+                //   ale je to věc preference
                 if (row == 0) { if (moveLeft) RotateU(); else RotateUprime(); }
                 else if (row == 1) { if (moveLeft) RotateE(); else RotateEprime(); }
-                else if (row == 2) { if (moveLeft) RotateD(); else RotateDprime(); }
+                else { if (moveLeft) RotateD(); else RotateDprime(); }
             }
             else if (side == "Top")
             {
-                // Pro "Top" horizontální posun:
-                //   row=0 => "zadní hrana"? => B?
-                //   row=2 => "přední hrana"? => F?
-                //   row=1 => střed => S / S' (slice)
+                // row=0 => B'/B, row=1 => S'/S, row=2 => F'/F
                 if (row == 0) { if (moveLeft) RotateBprime(); else RotateB(); }
                 else if (row == 1) { if (moveLeft) RotateSprime(); else RotateS(); }
-                else if (row == 2) { if (moveLeft) RotateFprime(); else RotateF(); }
+                else { if (moveLeft) RotateFprime(); else RotateF(); }
             }
             else if (side == "Bottom")
             {
-                // row=0 => F? row=2 => B? střed => S?
-                // Ale můžeme to prohodit. Zde volím:
+                // row=0 => F/F', row=1 => S/S', row=2 => B/B'
                 if (row == 0) { if (moveLeft) RotateF(); else RotateFprime(); }
                 else if (row == 1) { if (moveLeft) RotateS(); else RotateSprime(); }
-                else if (row == 2) { if (moveLeft) RotateB(); else RotateBprime(); }
+                else { if (moveLeft) RotateB(); else RotateBprime(); }
             }
         }
 
-        // ===================================================
-        //   KONKRÉTNÍ TAHY FACE / SLICE
-        // ===================================================
+        // =============================
+        //  KONKRÉTNÍ TAHY FACE / SLICE
+        // =============================
 
         private void RotateU()
         {
@@ -435,7 +434,6 @@ namespace RubikovaKostka
             var b = GetRow("Back", 0);
             var l = GetRow("Left", 0);
 
-            // front <- right <- back <- left <- front
             SetRow("Front", 0, r);
             SetRow("Right", 0, b);
             SetRow("Back", 0, l);
@@ -451,7 +449,6 @@ namespace RubikovaKostka
             var b = GetRow("Back", 2);
             var r = GetRow("Right", 2);
 
-            // front->left->back->right->front
             SetRow("Left", 2, f);
             SetRow("Back", 2, l);
             SetRow("Right", 2, b);
@@ -490,7 +487,6 @@ namespace RubikovaKostka
         }
         private void RotateLprime()
         {
-            // explicitní inverze
             var tC = GetColumn("Top", 0);
             var fC = GetColumn("Front", 0);
             var bC = GetColumn("Bottom", 0);
@@ -592,11 +588,11 @@ namespace RubikovaKostka
             RotateSideCounterclockwise("Back");
         }
 
-        // ---------- Slices ----------
+        // ----- Slice tahy (M, E, S) -----
 
         private void RotateM()
         {
-            // Prostřední sloupec (col=1) z pohledu front
+            // střední sloupec (col=1) z pohledu Front
             var topCol = GetColumn("Top", 1);
             var frontCol = GetColumn("Front", 1);
             var bottomCol = GetColumn("Bottom", 1);
@@ -614,7 +610,6 @@ namespace RubikovaKostka
             var bC = GetColumn("Bottom", 1);
             var bkC = GetColumn("Back", 1).AsEnumerable().Reverse().ToList();
 
-            // Opak M
             SetColumn("Top", 1, fC);
             SetColumn("Front", 1, bC);
             SetColumn("Bottom", 1, bkC.AsEnumerable().Reverse().ToList());
@@ -623,13 +618,12 @@ namespace RubikovaKostka
 
         private void RotateE()
         {
-            // Prostřední řádek (row=1)
+            // střední řádek (row=1)
             var f = GetRow("Front", 1);
             var r = GetRow("Right", 1);
             var b = GetRow("Back", 1);
             var l = GetRow("Left", 1);
 
-            // front->right->back->left
             SetRow("Right", 1, f);
             SetRow("Back", 1, r);
             SetRow("Left", 1, b);
@@ -650,9 +644,7 @@ namespace RubikovaKostka
 
         private void RotateS()
         {
-            // Prostřední hloubková vrstva (mezi F a B)
-            // - row=1 v Top/Bottom a col=1 v Left/Right
-            // Pro zjednodušení to uděláme podobně jako F, ale jen střed
+            // střední "hloubka" (mezi F a B)
             var topRow = GetRow("Top", 1);
             var leftCol = GetColumn("Left", 1).AsEnumerable().Reverse().ToList();
             var bottomRow = GetRow("Bottom", 1).AsEnumerable().Reverse().ToList();
@@ -670,7 +662,6 @@ namespace RubikovaKostka
             var bottomRow = GetRow("Bottom", 1).AsEnumerable().Reverse().ToList();
             var rightCol = GetColumn("Right", 1);
 
-            // Opak S
             SetRow("Top", 1, leftCol.AsEnumerable().Reverse().ToList());
             SetColumn("Left", 1, bottomRow);
             SetRow("Bottom", 1, rightCol.AsEnumerable().Reverse().ToList());

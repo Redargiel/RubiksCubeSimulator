@@ -8,7 +8,69 @@
         Focusable="True"
         FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
 
-    <Grid Background="White">
+    <!-- ZDE definujeme zdroje (styly, brushe, ...), které budou aplikovány v celé aplikaci. -->
+    <Window.Resources>
+
+        <!-- Styl pro pozadí okna (Gradient). Můžete upravit barvy dle libosti. -->
+        <LinearGradientBrush x:Key="WindowBackgroundBrush"
+                             StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFD5FFE8" Offset="0"/>
+            <GradientStop Color="#FFCDE4FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Styl pro všechna tlačítka (Button). -->
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Verdana"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="DarkSlateGray"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#FFE8E8E8"/>
+            <Setter Property="BorderBrush" Value="DarkGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+
+            <!-- Šablona pro kulaté rohy a měnění barvy při stisknutí. -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <!-- Triggery při najetí myši a stisku tlačítka. -->
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFB1EAFF"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FFFFC3C3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Styl pro Rectangle (všechny čtverečky na kostce). -->
+        <Style TargetType="Rectangle">
+            <!-- Zde si definujeme, že obdélníky mají mít jemný stín nebo jen standard. -->
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Stroke" Value="Black"/>
+        </Style>
+    </Window.Resources>
+
+    <!-- APLIKACE GRADIENT NA CELÉ POZADÍ OKNA -->
+    <Window.Background>
+        <StaticResource ResourceKey="WindowBackgroundBrush"/>
+    </Window.Background>
+
+    <Grid>
         <Grid.RowDefinitions>
             <!-- 1) Horní část s 2D kostkou -->
             <RowDefinition Height="*"/>
@@ -38,17 +100,18 @@
 
             <!-- 
                Layout: 
-                     (row=0,col=1) = Top (YELLOW)
-               (row=1,col=0) = Left (GREEN), (row=1,col=1)=Front (ORANGE),
-                                (row=1,col=2)=Right (BLUE),  (row=1,col=3)=Back (RED)
-                     (row=2,col=1) = Bottom (WHITE)
+                     (row=0,col=1) = Top (žlutá)
+               (row=1,col=0) = Left (zelená), (row=1,col=1)=Front (oranžová),
+                                (row=1,col=2)=Right (modrá), (row=1,col=3)=Back (červená)
+                     (row=2,col=1) = Bottom (bílá)
             -->
 
             <!-- TOP (YELLOW) -->
             <Border Grid.Row="0" Grid.Column="1"
-                    Margin="5">
-                <Grid x:Name="TopSide" 
-                      Width="210" Height="210">
+                    Margin="5"
+                    BorderThickness="2" BorderBrush="Gray"
+                    CornerRadius="8">
+                <Grid x:Name="TopSide" Width="210" Height="210">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="70"/>
@@ -64,9 +127,10 @@
 
             <!-- LEFT (GREEN) -->
             <Border Grid.Row="1" Grid.Column="0"
-                    Margin="5">
-                <Grid x:Name="LeftSide"
-                      Width="210" Height="210">
+                    Margin="5"
+                    BorderThickness="2" BorderBrush="Gray"
+                    CornerRadius="8">
+                <Grid x:Name="LeftSide" Width="210" Height="210">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="70"/>
@@ -82,9 +146,10 @@
 
             <!-- FRONT (ORANGE) -->
             <Border Grid.Row="1" Grid.Column="1"
-                    Margin="5">
-                <Grid x:Name="FrontSide"
-                      Width="210" Height="210">
+                    Margin="5"
+                    BorderThickness="2" BorderBrush="Gray"
+                    CornerRadius="8">
+                <Grid x:Name="FrontSide" Width="210" Height="210">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="70"/>
@@ -100,9 +165,10 @@
 
             <!-- RIGHT (BLUE) -->
             <Border Grid.Row="1" Grid.Column="2"
-                    Margin="5">
-                <Grid x:Name="RightSide"
-                      Width="210" Height="210">
+                    Margin="5"
+                    BorderThickness="2" BorderBrush="Gray"
+                    CornerRadius="8">
+                <Grid x:Name="RightSide" Width="210" Height="210">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="70"/>
@@ -118,9 +184,10 @@
 
             <!-- BACK (RED) -->
             <Border Grid.Row="1" Grid.Column="3"
-                    Margin="5">
-                <Grid x:Name="BackSide"
-                      Width="210" Height="210">
+                    Margin="5"
+                    BorderThickness="2" BorderBrush="Gray"
+                    CornerRadius="8">
+                <Grid x:Name="BackSide" Width="210" Height="210">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="70"/>
@@ -136,9 +203,10 @@
 
             <!-- BOTTOM (WHITE) -->
             <Border Grid.Row="2" Grid.Column="1"
-                    Margin="5">
-                <Grid x:Name="BottomSide"
-                      Width="210" Height="210">
+                    Margin="5"
+                    BorderThickness="2" BorderBrush="Gray"
+                    CornerRadius="8">
+                <Grid x:Name="BottomSide" Width="210" Height="210">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"/>
                         <RowDefinition Height="70"/>
@@ -153,32 +221,29 @@
             </Border>
         </Grid>
 
-        <!-- TLAČÍTKA šipek (nahoru/dolu/doleva/doprava) -->
+        <!-- TLAČÍTKA šipek -->
         <StackPanel Orientation="Vertical"
                     Grid.Row="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Margin="10">
+
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="↑"
                         Width="50" Height="50"
-                        Margin="5"
                         Click="RotateUp_Click"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="←"
                         Width="50" Height="50"
-                        Margin="5"
                         Click="RotateLeft_Click"/>
                 <Button Content="→"
                         Width="50" Height="50"
-                        Margin="5"
                         Click="RotateRight_Click"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="↓"
                         Width="50" Height="50"
-                        Margin="5"
                         Click="RotateDown_Click"/>
             </StackPanel>
         </StackPanel>
@@ -189,24 +254,23 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Margin="10">
+
             <Button Content="Reset"
                     Width="80" Height="40"
-                    Margin="10"
                     Click="ResetCube_Click"/>
             <Button Content="Undo"
                     Width="80" Height="40"
-                    Margin="10"
                     Click="UndoMove_Click"/>
             <Button Content="Scramble"
                     Width="80" Height="40"
-                    Margin="10"
                     Click="ScrambleCube_Click"/>
 
             <TextBlock x:Name="MovesTextBlock"
                        Text="Moves: 0"
                        FontSize="18"
                        VerticalAlignment="Center"
-                       Margin="20,0,0,0"/>
+                       Margin="20,0,0,0"
+                       Foreground="DarkBlue"/>
         </StackPanel>
     </Grid>
 </Window>
